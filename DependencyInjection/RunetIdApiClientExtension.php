@@ -9,7 +9,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Class RunetIdApiClientExtension
- * @package RunetId\ApiClientBundle\DependencyInjection
  */
 class RunetIdApiClientExtension extends ConfigurableExtension
 {

@@ -7,7 +7,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
  * Class Configuration
- * @package RunetId\ApiClientBundle\DependencyInjection
  */
 class Configuration implements ConfigurationInterface
 {
