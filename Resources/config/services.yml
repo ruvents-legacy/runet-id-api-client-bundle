@@ -1,3 +1,4 @@
 services:
-    runet_id.api_client:
-        class: RunetId\ApiClientBundle\ApiClient
+    runet_id.api_client_container:
+        class: RunetId\ApiClientBundle\ApiClientContainer
+        arguments: [ [] ]

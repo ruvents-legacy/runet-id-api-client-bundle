@@ -12,7 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * Class ApiClient
  */
-class ApiClient extends \RunetId\ApiClient\ApiClient
+class ApiCache
 {
     /**
      * @var array

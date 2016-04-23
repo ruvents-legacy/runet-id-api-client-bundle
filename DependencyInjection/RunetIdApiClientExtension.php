@@ -23,6 +23,7 @@ class RunetIdApiClientExtension extends ConfigurableExtension
         );
         $loader->load('services.yml');
 
-        $container->getDefinition('runet_id.api_client')->setArguments([$mergedConfig]);
+        $container->getDefinition('runet_id.api_client_container')
+            ->setArguments([$mergedConfig]);
     }
 }
