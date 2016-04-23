@@ -27,6 +27,11 @@ class ApiClient extends \RunetId\ApiClient\ApiClient
     protected $filesystem;
 
     /**
+     * @var bool
+     */
+    protected $noCache = false;
+
+    /**
      * @inheritdoc
      */
     public function __construct(array $options = [])
@@ -40,10 +45,6 @@ class ApiClient extends \RunetId\ApiClient\ApiClient
      */
     public function get($path, array $data = [], array $headers = [])
     {
-        if (!$this->isCacheSupported($path)) {
-            return parent::get($path, $data, $headers);
-        }
-
         $request = $this->createRequest($path, $data, [], $headers);
 
         return $this->processCachedResponse($request, 'get');
@@ -54,13 +55,19 @@ class ApiClient extends \RunetId\ApiClient\ApiClient
      */
     public function post($path, array $query = [], $data = null, array $headers = [], array $files = [])
     {
-        if (!$this->isCacheSupported($path)) {
-            return parent::post($path, $query, $data, $headers, $files);
-        }
-
         $request = $this->createRequest($path, $query, $data, $headers, $files);
 
         return $this->processCachedResponse($request, 'post');
+    }
+
+    /**
+     * @return $this
+     */
+    public function noCache()
+    {
+        $this->noCache = true;
+
+        return $this;
     }
 
     /**
@@ -82,27 +89,43 @@ class ApiClient extends \RunetId\ApiClient\ApiClient
     }
 
     /**
-     * @param string $path
-     * @return bool
-     */
-    protected function isCacheSupported($path)
-    {
-        return $this->options['use_cache'] && in_array($path, self::$cacheSupportedPaths);
-    }
-
-    /**
      * @param Request $request
      * @param string  $method
      * @return Response
      */
     protected function processCachedResponse(Request $request, $method)
     {
-        if (!$response = $this->readCache($request)) {
-            $response = HttpClient::$method($request);
+        if (!$this->isCacheSupported($request->getUri()->getPath())) {
+            return HttpClient::$method($request);
+        }
+
+        if ($response = $this->readCache($request)) {
+            return $response;
+        }
+
+        /** @var Response $response */
+        $response = HttpClient::$method($request);
+
+        if (200 == $response->getCode()) {
             $this->writeCache($request, $response);
         }
 
         return $response;
+    }
+
+    /**
+     * @param string $path
+     * @return bool
+     */
+    protected function isCacheSupported($path)
+    {
+        $isCacheSupported = $this->options['use_cache']
+            && !$this->noCache
+            && in_array($path, self::$cacheSupportedPaths);
+
+        $this->noCache = false;
+
+        return $isCacheSupported;
     }
 
     /**
