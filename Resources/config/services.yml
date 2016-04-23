@@ -1,3 +1,3 @@
 services:
     runet_id.api_client:
-        class: RunetId\ApiClient\ApiClient
+        class: RunetId\ApiClientBundle\ApiClient

@@ -46,6 +46,16 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->booleanNode('use_cache')
+                    ->defaultFalse()
+                ->end()
+                ->scalarNode('cache_dir')
+                    ->defaultValue('%kernel.cache_dir%/runet_id_api_client')
+                    ->cannotBeEmpty()
+                ->end()
+                ->integerNode('cache_lifetime')
+                    ->defaultValue(3 * 60)
+                ->end()
             ->end();
 
         return $treeBuilder;
