@@ -2,24 +2,27 @@
 
 namespace RunetId\ApiClientBundle;
 
-use Ruvents\HttpClient\HttpClient;
 use Ruvents\HttpClient\Request\Request;
 use Ruvents\HttpClient\Response\Response;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Class ApiClient
+ * Class ApiCache
  */
 class ApiCache
 {
     /**
      * @var array
      */
-    protected static $cacheSupportedPaths = [
+    protected static $supportedPaths = [
         'user/get',
     ];
+
+    /**
+     * @var array
+     */
+    protected $options;
 
     /**
      * @var Filesystem
@@ -27,127 +30,57 @@ class ApiCache
     protected $filesystem;
 
     /**
-     * @var bool
+     * @param array      $options
+     * @param Filesystem $filesystem
      */
-    protected $noCache = false;
-
-    /**
-     * @inheritdoc
-     */
-    public function __construct(array $options = [])
+    public function __construct(array $options, Filesystem $filesystem)
     {
-        parent::__construct($options);
-        $this->filesystem = new Filesystem();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function get($path, array $data = [], array $headers = [])
-    {
-        $request = $this->createRequest($path, $data, [], $headers);
-
-        return $this->processCachedResponse($request, 'get');
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function post($path, array $query = [], $data = null, array $headers = [], array $files = [])
-    {
-        $request = $this->createRequest($path, $query, $data, $headers, $files);
-
-        return $this->processCachedResponse($request, 'post');
-    }
-
-    /**
-     * @return $this
-     */
-    public function noCache()
-    {
-        $this->noCache = true;
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function configureOptions(OptionsResolver $resolver)
-    {
-        parent::configureOptions($resolver);
-
-        $resolver
-            ->setDefaults([
-                'use_cache' => false,
-                'cache_lifetime' => null,
-                'cache_dir' => null,
-            ])
-            ->setRequired(['use_cache', 'cache_lifetime', 'cache_dir'])
-            ->setAllowedTypes('cache_lifetime', 'int')
-            ->setAllowedTypes('cache_dir', 'string');
-    }
-
-    /**
-     * @param Request $request
-     * @param string  $method
-     * @return Response
-     */
-    protected function processCachedResponse(Request $request, $method)
-    {
-        if (!$this->isCacheSupported($request->getUri()->getPath())) {
-            return HttpClient::$method($request);
-        }
-
-        if ($response = $this->readCache($request)) {
-            return $response;
-        }
-
-        /** @var Response $response */
-        $response = HttpClient::$method($request);
-
-        if (200 == $response->getCode()) {
-            $this->writeCache($request, $response);
-        }
-
-        return $response;
-    }
-
-    /**
-     * @param string $path
-     * @return bool
-     */
-    protected function isCacheSupported($path)
-    {
-        $isCacheSupported = $this->options['use_cache']
-            && !$this->noCache
-            && in_array($path, self::$cacheSupportedPaths);
-
-        $this->noCache = false;
-
-        return $isCacheSupported;
-    }
-
-    /**
-     * @param Request  $request
-     * @param Response $response
-     */
-    protected function writeCache(Request $request, Response $response)
-    {
-        $filename = $this->getRequestCachePath($request);
-
-        $this->filesystem->dumpFile($filename, $response->getRawBody());
+        $this->options = $options;
+        $this->filesystem = $filesystem;
     }
 
     /**
      * @param Request $request
      * @return null|Response
      */
-    protected function readCache(Request $request)
+    public function processRequest(Request $request)
+    {
+        if ($this->options['enabled']
+            && $this->isPathSupported($request->getUri()->getPath())
+        ) {
+            return $this->read($request);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param Request  $request
+     * @param Response $response
+     */
+    public function processResponse(Request $request, Response $response)
+    {
+        $this->write($request, $response);
+    }
+
+    /**
+     * @param string $path
+     * @return bool
+     */
+    public static function isPathSupported($path)
+    {
+        return in_array($path, self::$supportedPaths);
+    }
+
+    /**
+     * @param Request $request
+     * @return null|Response
+     */
+    protected function read(Request $request)
     {
         $filename = $this->getRequestCachePath($request);
 
-        if ($this->isCacheFresh($request)) {
+        if ($this->isFresh($request)) {
             $rawBody = file_get_contents($filename);
 
             return new Response($rawBody, 200, [], $request);
@@ -157,10 +90,21 @@ class ApiCache
     }
 
     /**
+     * @param Request  $request
+     * @param Response $response
+     */
+    protected function write(Request $request, Response $response)
+    {
+        $filename = $this->getRequestCachePath($request);
+
+        $this->filesystem->dumpFile($filename, $response->getRawBody());
+    }
+
+    /**
      * @param Request $request
      * @return bool
      */
-    protected function isCacheFresh(Request $request)
+    protected function isFresh(Request $request)
     {
         $filename = $this->getRequestCachePath($request);
 
@@ -168,15 +112,15 @@ class ApiCache
             return false;
         }
 
-        return (time() - filemtime($filename)) < ($this->options['cache_lifetime'] * 60);
+        return (time() - filemtime($filename)) < ($this->options['lifetime'] * 60);
     }
 
     /**
      * @throws IOException
      */
-    public function clearCache()
+    public function clear()
     {
-        $this->filesystem->remove($this->options['cache_dir']);
+        $this->filesystem->remove($this->options['dir']);
     }
 
     /**
@@ -187,7 +131,7 @@ class ApiCache
     {
         $hash = $this->getRequestHash($request);
 
-        return $this->options['cache_dir'].'/'.rtrim(chunk_split($hash, 8, '/'), '/');
+        return $this->options['dir'].'/'.rtrim(chunk_split($hash, 8, '/'), '/');
     }
 
     /**

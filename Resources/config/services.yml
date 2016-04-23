@@ -1,4 +1,18 @@
 services:
-    runet_id.api_client_container:
+    runet_id.api_client.model_reconstructor:
+        class: RunetId\ApiClient\ModelReconstructor
+        arguments:
+            - []
+
+    runet_id.api_client.cache:
+        class: RunetId\ApiClientBundle\ApiCache
+        arguments:
+            - []
+            - "@filesystem"
+
+    runet_id.api_client.container:
         class: RunetId\ApiClientBundle\ApiClientContainer
-        arguments: [ [] ]
+        arguments:
+            - []
+            - "@runet_id.api_client.model_reconstructor"
+            - "@runet_id.api_client.cache"

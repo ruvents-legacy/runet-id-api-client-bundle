@@ -4,6 +4,7 @@ namespace RunetId\ApiClientBundle;
 
 use RunetId\ApiClient\ApiClient;
 use RunetId\ApiClientBundle\Exception\ApiClientBundleException;
+use Ruvents\DataReconstructor\DataReconstructor;
 
 /**
  * Class ApiClientContainer
@@ -16,6 +17,16 @@ class ApiClientContainer
     protected $options;
 
     /**
+     * @var DataReconstructor
+     */
+    protected $modelReconstructor;
+
+    /**
+     * @var ApiCache
+     */
+    protected $apiCache;
+
+    /**
      * @var string
      */
     protected $currentName;
@@ -26,11 +37,15 @@ class ApiClientContainer
     protected $clients = [];
 
     /**
-     * @param array $options
+     * @param array             $options
+     * @param DataReconstructor $modelReconstructor
+     * @param ApiCache          $apiCache
      */
-    public function __construct(array $options)
+    public function __construct(array $options, DataReconstructor $modelReconstructor, ApiCache $apiCache)
     {
         $this->options = $options;
+        $this->modelReconstructor = $modelReconstructor;
+        $this->apiCache = $apiCache;
     }
 
     /**
@@ -57,7 +72,7 @@ class ApiClientContainer
 
         if (!isset($this->clients[$name])) {
             $options = $this->getClientOptions($name);
-            $this->clients[$name] = new ApiClient($options);
+            $this->clients[$name] = new ApiClientCacheable($options, $this->modelReconstructor, $this->apiCache);
         }
 
         return $this->clients[$name];
@@ -95,19 +110,15 @@ class ApiClientContainer
     }
 
     /**
-     * @param string $clientName
+     * @param string $name
      * @return array
      */
-    protected function getClientOptions($clientName)
+    protected function getClientOptions($name)
     {
-        $options = [];
+        $options = $this->options['client'];
 
-        foreach (['host', 'secure', 'model_reconstructor'] as $optionName) {
-            $options[$optionName] = $this->options[$optionName];
-        }
-
-        $options['key'] = $this->options['credentials'][$clientName]['key'];
-        $options['secret'] = $this->options['credentials'][$clientName]['secret'];
+        $options['key'] = $this->options['credentials'][$name]['key'];
+        $options['secret'] = $this->options['credentials'][$name]['secret'];
 
         return $options;
     }
