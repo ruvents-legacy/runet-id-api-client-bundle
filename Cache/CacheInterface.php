@@ -12,13 +12,28 @@ interface CacheInterface
 {
     /**
      * @param Request $request
+     * @return bool
+     */
+    public function isCacheable(Request $request);
+
+    /**
+     * @param Request $request
      * @return null|Response
      */
-    public function processRequest(Request $request);
+    public function read(Request $request);
 
     /**
      * @param Request  $request
      * @param Response $response
      */
-    public function processResponse(Request $request, Response $response);
+    public function write(Request $request, Response $response);
+
+    /**
+     * @param Request $request
+     */
+    public function remove(Request $request);
+
+    /**
+     */
+    public function clear();
 }

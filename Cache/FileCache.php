@@ -4,7 +4,6 @@ namespace RunetId\ApiClientBundle\Cache;
 
 use Ruvents\HttpClient\Request\Request;
 use Ruvents\HttpClient\Response\Response;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -40,41 +39,17 @@ class FileCache implements CacheInterface
     }
 
     /**
-     * @param Request $request
-     * @return null|Response
+     * @inheritdoc
      */
-    public function processRequest(Request $request)
+    public function isCacheable(Request $request)
     {
-        if ($this->isPathSupported($request->getUri()->getPath())) {
-            return $this->read($request);
-        }
-
-        return null;
+        return in_array($request->getUri()->getPath(), self::$supportedPaths);
     }
 
     /**
-     * @param Request  $request
-     * @param Response $response
+     * @inheritdoc
      */
-    public function processResponse(Request $request, Response $response)
-    {
-        $this->write($request, $response);
-    }
-
-    /**
-     * @param string $path
-     * @return bool
-     */
-    public static function isPathSupported($path)
-    {
-        return in_array($path, self::$supportedPaths);
-    }
-
-    /**
-     * @param Request $request
-     * @return null|Response
-     */
-    protected function read(Request $request)
+    public function read(Request $request)
     {
         $filename = $this->getRequestCachePath($request);
 
@@ -88,14 +63,31 @@ class FileCache implements CacheInterface
     }
 
     /**
-     * @param Request  $request
-     * @param Response $response
+     * @inheritdoc
      */
-    protected function write(Request $request, Response $response)
+    public function write(Request $request, Response $response)
     {
         $filename = $this->getRequestCachePath($request);
 
         $this->filesystem->dumpFile($filename, $response->getRawBody());
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function remove(Request $request)
+    {
+        $filename = $this->getRequestCachePath($request);
+
+        $this->filesystem->remove($filename);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function clear()
+    {
+        $this->filesystem->remove($this->options['dir']);
     }
 
     /**
@@ -111,14 +103,6 @@ class FileCache implements CacheInterface
         }
 
         return (time() - filemtime($filename)) < ($this->options['lifetime'] * 60);
-    }
-
-    /**
-     * @throws IOException
-     */
-    public function clear()
-    {
-        $this->filesystem->remove($this->options['dir']);
     }
 
     /**

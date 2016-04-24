@@ -18,9 +18,14 @@ class ApiCacheableClient extends ApiClient
     protected $cache;
 
     /**
-     * @param array                  $options
-     * @param DataReconstructor $modelReconstructor
-     * @param CacheInterface|null         $cache
+     * @var bool
+     */
+    protected $noCacheOnce = false;
+
+    /**
+     * @param array               $options
+     * @param DataReconstructor   $modelReconstructor
+     * @param CacheInterface|null $cache
      */
     public function __construct(array $options, DataReconstructor $modelReconstructor, CacheInterface $cache = null)
     {
@@ -30,21 +35,37 @@ class ApiCacheableClient extends ApiClient
     }
 
     /**
+     * @return $this
+     */
+    public function noCacheOnce()
+    {
+        $this->noCacheOnce = true;
+
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     protected function send($method, Request $request)
     {
-        if (!isset($this->cache)) {
+        if (!isset($this->cache) || !$this->cache->isCacheable($request)) {
             return parent::send($method, $request);
         }
-        
-        if ($response = $this->cache->processRequest($request)) {
+
+        if ($this->noCacheOnce) {
+            $this->noCacheOnce = false;
+
+            return parent::send($method, $request);
+        }
+
+        if ($response = $this->cache->read($request)) {
             return $response;
         }
 
         $response = parent::send($method, $request);
 
-        $this->cache->processResponse($request, $response);
+        $this->cache->write($request, $response);
 
         return $response;
     }
