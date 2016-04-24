@@ -4,8 +4,8 @@ services:
         arguments:
             - []
 
-    runet_id.api_client.cache:
-        class: RunetId\ApiClientBundle\ApiCache
+    runet_id.api_client.cache.file:
+        class: RunetId\ApiClientBundle\Cache\FileCache
         arguments:
             - []
             - "@filesystem"
@@ -15,4 +15,4 @@ services:
         arguments:
             - []
             - "@runet_id.api_client.model_reconstructor"
-            - "@runet_id.api_client.cache"
+            - ~

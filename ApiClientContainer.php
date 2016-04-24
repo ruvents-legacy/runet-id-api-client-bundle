@@ -2,7 +2,7 @@
 
 namespace RunetId\ApiClientBundle;
 
-use RunetId\ApiClient\ApiClient;
+use RunetId\ApiClientBundle\Cache\CacheInterface;
 use RunetId\ApiClientBundle\Exception\ApiClientBundleException;
 use Ruvents\DataReconstructor\DataReconstructor;
 
@@ -22,9 +22,9 @@ class ApiClientContainer
     protected $modelReconstructor;
 
     /**
-     * @var ApiCache
+     * @var CacheInterface|null
      */
-    protected $apiCache;
+    protected $cache;
 
     /**
      * @var string
@@ -32,20 +32,20 @@ class ApiClientContainer
     protected $currentName;
 
     /**
-     * @var ApiClient[]
+     * @var ApiCacheableClient[]
      */
     protected $clients = [];
 
     /**
      * @param array             $options
      * @param DataReconstructor $modelReconstructor
-     * @param ApiCache          $apiCache
+     * @param CacheInterface|null    $cache
      */
-    public function __construct(array $options, DataReconstructor $modelReconstructor, ApiCache $apiCache)
+    public function __construct(array $options, DataReconstructor $modelReconstructor, CacheInterface $cache = null)
     {
         $this->options = $options;
         $this->modelReconstructor = $modelReconstructor;
-        $this->apiCache = $apiCache;
+        $this->cache = $cache;
     }
 
     /**
@@ -58,7 +58,7 @@ class ApiClientContainer
 
     /**
      * @param string $name
-     * @return ApiClient
+     * @return ApiCacheableClient
      */
     public function get($name)
     {
@@ -72,14 +72,14 @@ class ApiClientContainer
 
         if (!isset($this->clients[$name])) {
             $options = $this->getClientOptions($name);
-            $this->clients[$name] = new ApiClientCacheable($options, $this->modelReconstructor, $this->apiCache);
+            $this->clients[$name] = new ApiCacheableClient($options, $this->modelReconstructor, $this->cache);
         }
 
         return $this->clients[$name];
     }
 
     /**
-     * @return ApiClient
+     * @return ApiCacheableClient
      */
     public function getDefault()
     {
@@ -98,7 +98,7 @@ class ApiClientContainer
     }
 
     /**
-     * @return ApiClient
+     * @return ApiCacheableClient
      */
     public function getCurrent()
     {

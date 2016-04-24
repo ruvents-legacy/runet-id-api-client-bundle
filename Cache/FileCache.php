@@ -1,6 +1,6 @@
 <?php
 
-namespace RunetId\ApiClientBundle;
+namespace RunetId\ApiClientBundle\Cache;
 
 use Ruvents\HttpClient\Request\Request;
 use Ruvents\HttpClient\Response\Response;
@@ -8,9 +8,9 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * Class ApiCache
+ * Class FileCache
  */
-class ApiCache
+class FileCache implements CacheInterface
 {
     /**
      * @var array
@@ -45,9 +45,7 @@ class ApiCache
      */
     public function processRequest(Request $request)
     {
-        if ($this->options['enabled']
-            && $this->isPathSupported($request->getUri()->getPath())
-        ) {
+        if ($this->isPathSupported($request->getUri()->getPath())) {
             return $this->read($request);
         }
 
