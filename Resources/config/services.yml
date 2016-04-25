@@ -16,3 +16,9 @@ services:
             - []
             - "@runet_id.api_client.model_reconstructor"
             - ~
+
+    runet_id.api_client.twig.api_extension:
+        class: RunetId\ApiClientBundle\Twig\ApiExtension
+        public: false
+        tags:
+            - { name: twig.extension }
