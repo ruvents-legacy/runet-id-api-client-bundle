@@ -16,19 +16,36 @@ class ApiExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
-            new \Twig_SimpleFunction('api_role', function ($name) {
-                $constName = Status::class.'::'.'ROLE_'.strtoupper($name);
-
-                if (!defined($constName)) {
-                    throw new ApiClientBundleException(sprintf(
-                        '"%s" is not found.',
-                        $constName
-                    ));
+            new \Twig_SimpleFunction('api_role', [$this, 'getRoleId']),
+            new \Twig_SimpleFunction('api_roles', function (array $names) {
+                $ids = [];
+                
+                foreach ($names as $name) {
+                    $ids[] = $this->getRoleId($name);
                 }
 
-                return constant($constName);
+                return $ids;
             }),
         ];
+    }
+
+    /**
+     * @param string $name
+     * @throws ApiClientBundleException
+     * @return int
+     */
+    public function getRoleId($name)
+    {
+        $constName = Status::class.'::'.'ROLE_'.strtoupper($name);
+
+        if (!defined($constName)) {
+            throw new ApiClientBundleException(sprintf(
+                '"%s" is not found.',
+                $constName
+            ));
+        }
+
+        return constant($constName);
     }
 
     /**
