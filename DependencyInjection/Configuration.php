@@ -74,6 +74,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->arrayNode('model_reconstructor')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->arrayNode('map')
                             ->prototype('array')

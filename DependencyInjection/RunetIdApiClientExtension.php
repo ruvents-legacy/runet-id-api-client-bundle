@@ -24,7 +24,7 @@ class RunetIdApiClientExtension extends ConfigurableExtension
         $loader->load('services.yml');
 
         $container->getDefinition('runet_id.api_client.model_reconstructor')
-            ->replaceArgument(0, isset($mergedConfig['model_reconstructor']) ? $mergedConfig['model_reconstructor'] : []);
+            ->replaceArgument(0, $mergedConfig['model_reconstructor']);
 
         $container->getDefinition('runet_id.api_client.cache.file')
             ->replaceArgument(0, $mergedConfig['cache']['file']);
