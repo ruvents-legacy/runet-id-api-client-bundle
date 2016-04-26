@@ -37,9 +37,9 @@ class ApiClientContainer
     protected $clients = [];
 
     /**
-     * @param array             $options
-     * @param DataReconstructor $modelReconstructor
-     * @param CacheInterface|null    $cache
+     * @param array               $options
+     * @param DataReconstructor   $modelReconstructor
+     * @param CacheInterface|null $cache
      */
     public function __construct(array $options, DataReconstructor $modelReconstructor, CacheInterface $cache = null)
     {
@@ -79,11 +79,19 @@ class ApiClientContainer
     }
 
     /**
+     * @return string
+     */
+    public function getDefaultName()
+    {
+        return $this->options['default_credentials'];
+    }
+
+    /**
      * @return ApiCacheableClient
      */
     public function getDefault()
     {
-        return $this->get($this->options['default_credentials']);
+        return $this->get($this->getDefaultName());
     }
 
     /**
@@ -95,6 +103,14 @@ class ApiClientContainer
         $this->currentName = $currentName;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrentName()
+    {
+        return $this->currentName;
     }
 
     /**
