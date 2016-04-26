@@ -2,7 +2,6 @@
 
 namespace RunetId\ApiClientBundle\Twig;
 
-use RunetId\ApiClient\Model\User\Status;
 use RunetId\ApiClientBundle\Exception\ApiClientBundleException;
 
 /**
@@ -36,7 +35,7 @@ class ApiExtension extends \Twig_Extension
      */
     public function getRoleId($name)
     {
-        $constName = Status::class.'::'.'ROLE_'.strtoupper($name);
+        $constName = 'RunetId\ApiClient\Model\User\Status::ROLE_'.strtoupper($name);
 
         if (!defined($constName)) {
             throw new ApiClientBundleException(sprintf(
