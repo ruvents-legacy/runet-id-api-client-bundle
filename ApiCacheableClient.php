@@ -13,6 +13,20 @@ use Ruvents\HttpClient\Request\Request;
 class ApiCacheableClient extends ApiClient
 {
     /**
+     * @var array
+     */
+    protected static $cacheablePaths = [
+        'user/get',
+        'event/info',
+        'event/users',
+        'professionalinterest/list',
+        'section/info',
+        'section/list',
+        'section/user',
+        'section/reports',
+    ];
+
+    /**
      * @var CacheInterface|null
      */
     protected $cache;
@@ -49,7 +63,7 @@ class ApiCacheableClient extends ApiClient
      */
     protected function send($method, Request $request)
     {
-        if (!isset($this->cache) || !$this->cache->isCacheable($request)) {
+        if (!isset($this->cache) || !$this->isRequestCacheable($request)) {
             return parent::send($method, $request);
         }
 
@@ -68,5 +82,14 @@ class ApiCacheableClient extends ApiClient
         $this->cache->write($request, $response);
 
         return $response;
+    }
+
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    public function isRequestCacheable(Request $request)
+    {
+        return in_array($request->getUri()->getPath(), static::$cacheablePaths, true);
     }
 }

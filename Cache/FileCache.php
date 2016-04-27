@@ -14,13 +14,6 @@ class FileCache implements CacheInterface
     /**
      * @var array
      */
-    protected static $supportedPaths = [
-        'user/get',
-    ];
-
-    /**
-     * @var array
-     */
     protected $options;
 
     /**
@@ -36,14 +29,6 @@ class FileCache implements CacheInterface
     {
         $this->options = $options;
         $this->filesystem = $filesystem;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isCacheable(Request $request)
-    {
-        return in_array($request->getUri()->getPath(), self::$supportedPaths);
     }
 
     /**

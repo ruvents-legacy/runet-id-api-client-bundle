@@ -12,12 +12,6 @@ interface CacheInterface
 {
     /**
      * @param Request $request
-     * @return bool
-     */
-    public function isCacheable(Request $request);
-
-    /**
-     * @param Request $request
      * @return null|Response
      */
     public function read(Request $request);
