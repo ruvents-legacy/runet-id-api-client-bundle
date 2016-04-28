@@ -4,6 +4,7 @@ namespace RunetId\ApiClientBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -28,13 +29,13 @@ class RunetIdApiClientExtension extends ConfigurableExtension
 
         $container->getDefinition('runet_id.api_client.cache.file')
             ->replaceArgument(0, $mergedConfig['cache']['file']);
-        
+
         $apiContainerService = $container
             ->getDefinition('runet_id.api_client.container')
             ->replaceArgument(0, $mergedConfig['container']);
 
         if ($mergedConfig['cache']['enabled']) {
-            $cacheService = $container->getDefinition($mergedConfig['cache']['service']);
+            $cacheService = new Reference($mergedConfig['cache']['service']);
             $apiContainerService->replaceArgument(2, $cacheService);
         }
     }
