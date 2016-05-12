@@ -27,7 +27,5 @@ interface CacheInterface
      */
     public function remove(Request $request);
 
-    /**
-     */
     public function clear();
 }

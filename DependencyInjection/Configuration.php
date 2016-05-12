@@ -90,6 +90,22 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('entity')
+                    ->children()
+                        ->arrayNode('user')
+                            ->children()
+                                ->scalarNode('class')
+                                    ->cannotBeEmpty()
+                                    ->defaultValue('RunetId\ApiClientBundle\Entity\User')
+                                ->end()
+                                ->scalarNode('api_credentials_name')
+                                    ->cannotBeEmpty()
+                                    ->defaultValue('%runet_id.api_client.default_credentials_name%')
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

@@ -17,8 +17,14 @@ services:
             - "@runet_id.api_client.model_reconstructor"
             - ~
 
-    runet_id.api_client.twig.api_extension:
-        class: RunetId\ApiClientBundle\Twig\ApiExtension
-        public: false
+    runet_id.api_client.listener.api_user_loader:
+        class: RunetId\ApiClientBundle\EventListener\ApiUserLoader
+        arguments:
+            - "@=service('runet_id.api_client.container').get(parameter('runet_id.api_client.default_credentials_name'))"
         tags:
-            - { name: twig.extension }
+            - { name: doctrine.event_listener, event: postLoad }
+
+    runet_id.api_client.auth_controller:
+        class: RunetId\ApiClientBundle\Controller\AuthController
+        arguments:
+            - "@templating"
