@@ -24,10 +24,16 @@ services:
         tags:
             - { name: doctrine.event_listener, event: postLoad }
 
+    runet_id.api_client.auth_service:
+        class: RunetId\ApiClientBundle\AuthService
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+            - ~
+            - "@security.token_storage"
+
     runet_id.api_client.auth_controller:
         class: RunetId\ApiClientBundle\Controller\AuthController
         arguments:
             - "@templating"
             - "@=service('runet_id.api_client.container').getDefault()"
-            - "@doctrine.orm.default_entity_manager"
-            - ~
+            - "@runet_id.api_client.auth_service"

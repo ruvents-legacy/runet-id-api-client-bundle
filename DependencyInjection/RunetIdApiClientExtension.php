@@ -39,7 +39,7 @@ class RunetIdApiClientExtension extends ConfigurableExtension
             $apiContainerService->replaceArgument(2, $cacheService);
         }
         
-        $container->getDefinition('runet_id.api_client.auth_controller')
-            ->replaceArgument(3, $mergedConfig['entity']['user']['class']);
+        $container->getDefinition('runet_id.api_client.auth_service')
+            ->replaceArgument(1, $mergedConfig['entity']['user']['class']);
     }
 }

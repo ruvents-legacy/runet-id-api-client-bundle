@@ -2,11 +2,11 @@
 
 namespace RunetId\ApiClientBundle\Controller;
 
-use Doctrine\ORM\EntityManager;
 use RunetId\ApiClientBundle\ApiCacheableClient;
-use RunetId\ApiClientBundle\Entity\AbstractUser;
+use RunetId\ApiClientBundle\AuthService;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class AuthController
@@ -24,31 +24,23 @@ class AuthController
     protected $apiClient;
 
     /**
-     * @var EntityManager
+     * @var AuthService
      */
-    protected $em;
-
-    /**
-     * @var string
-     */
-    protected $userClass;
+    protected $authService;
 
     /**
      * @param EngineInterface    $templating
      * @param ApiCacheableClient $apiClient
-     * @param EntityManager      $em
-     * @param string             $userClass
+     * @param AuthService        $authService
      */
     public function __construct(
         EngineInterface $templating,
         ApiCacheableClient $apiClient,
-        EntityManager $em,
-        $userClass
+        AuthService $authService
     ) {
         $this->templating = $templating;
         $this->apiClient = $apiClient;
-        $this->em = $em;
-        $this->userClass = $userClass;
+        $this->authService = $authService;
     }
 
     /**
@@ -71,25 +63,8 @@ class AuthController
             ->user()
             ->getByToken($token);
 
-        $user = $this->em
-            ->getRepository($this->userClass)
-            ->findOneByRunetId($apiUser->RunetId);
-
-        if (!$user) {
-            $userClass = $this->userClass;
-
-            /** @var AbstractUser $user */
-            $user = new $userClass($apiUser->RunetId);
-        }
-
-        dump($user);
-        return;
-
-        /* $this->get('runet_id.api_client.container')->getDefault()
-             ->event()
-             ->register($user->getRunetId());
- 
-         $this->authUser($user);*/
+        $user = $this->authService->findOrCreateUser($apiUser->RunetId);
+        $this->authService->authUser($user);
 
         return new Response('
             <script>

@@ -39,8 +39,8 @@ abstract class AbstractUser extends ApiUserProxy implements UserInterface, \Seri
     private $password;
 
     /**
-     * @var string
-     * @ORM\Column(type="string")
+     * @var string[]
+     * @ORM\Column(type="simple_array")
      */
     protected $roles;
 
@@ -90,7 +90,7 @@ abstract class AbstractUser extends ApiUserProxy implements UserInterface, \Seri
      */
     public function getUsername()
     {
-        return $this->firstName;
+        return $this->runetId;
     }
 
     /**
@@ -99,6 +99,14 @@ abstract class AbstractUser extends ApiUserProxy implements UserInterface, \Seri
     public function getUrl()
     {
         return ApiUser::getUrlByRunetId($this->runetId);
+    }
+
+    /**
+     *
+     */
+    public function generateRandomPassword()
+    {
+        $this->password = base64_encode(random_bytes(20));
     }
 
     /**
@@ -155,8 +163,11 @@ abstract class AbstractUser extends ApiUserProxy implements UserInterface, \Seri
      */
     public function onPrePersist()
     {
-        $this->password = base64_encode(random_bytes(10));
+        $this->generateRandomPassword();
         $this->registeredAt = new \DateTime;
+        if (empty($this->roles)) {
+            $this->roles = ['ROLE_USER'];
+        }
     }
 
     /**
