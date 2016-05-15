@@ -13,6 +13,11 @@ use Ruvents\HttpClient\Request\Request;
 class ApiCacheableClient extends ApiClient
 {
     /**
+     * @var string
+     */
+    private $name;
+
+    /**
      * @var array
      */
     protected static $cacheablePaths = [
@@ -37,15 +42,28 @@ class ApiCacheableClient extends ApiClient
     protected $noCacheOnce = false;
 
     /**
+     * @param string              $name
      * @param array               $options
      * @param DataReconstructor   $modelReconstructor
      * @param CacheInterface|null $cache
      */
-    public function __construct(array $options, DataReconstructor $modelReconstructor, CacheInterface $cache = null)
-    {
+    public function __construct(
+        $name,
+        array $options,
+        DataReconstructor $modelReconstructor,
+        CacheInterface $cache = null
+    ) {
+        $this->name = $name;
         parent::__construct($options, $modelReconstructor);
-
         $this->cache = $cache;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -88,7 +106,7 @@ class ApiCacheableClient extends ApiClient
      * @param Request $request
      * @return bool
      */
-    public function isRequestCacheable(Request $request)
+    protected function isRequestCacheable(Request $request)
     {
         return in_array($request->getUri()->getPath(), static::$cacheablePaths, true);
     }

@@ -20,7 +20,7 @@ services:
     runet_id.api_client.listener.api_user_loader:
         class: RunetId\ApiClientBundle\EventListener\ApiUserLoader
         arguments:
-            - "@=service('runet_id.api_client.container').get(parameter('runet_id.api_client.default_credentials_name'))"
+            - "@=service('runet_id.api_client.container').getDefault()"
         tags:
             - { name: doctrine.event_listener, event: postLoad }
 
@@ -28,3 +28,6 @@ services:
         class: RunetId\ApiClientBundle\Controller\AuthController
         arguments:
             - "@templating"
+            - "@=service('runet_id.api_client.container').getDefault()"
+            - "@doctrine.orm.default_entity_manager"
+            - ~

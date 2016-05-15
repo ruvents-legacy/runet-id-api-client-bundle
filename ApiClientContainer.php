@@ -49,14 +49,6 @@ class ApiClientContainer
     }
 
     /**
-     * @return array
-     */
-    public function getOptions()
-    {
-        return $this->options;
-    }
-
-    /**
      * @param string $name
      * @return ApiCacheableClient
      */
@@ -64,26 +56,22 @@ class ApiClientContainer
     {
         if (!in_array($name, $credNames = array_keys($this->options['credentials']))) {
             throw new ApiClientBundleException(sprintf(
-                '"%s" credentials set does not exist. The following are available: %s.',
+                'Credentials profile "%s" was not found. The following are available: %s.',
                 $name,
                 implode(',', $credNames)
             ));
         }
 
         if (!isset($this->clients[$name])) {
-            $options = $this->getClientOptions($name);
-            $this->clients[$name] = new ApiCacheableClient($options, $this->modelReconstructor, $this->cache);
+            $this->clients[$name] = new ApiCacheableClient(
+                $name,
+                $this->getClientOptions($name),
+                $this->modelReconstructor,
+                $this->cache
+            );
         }
 
         return $this->clients[$name];
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultName()
-    {
-        return $this->options['default_credentials'];
     }
 
     /**
@@ -91,26 +79,27 @@ class ApiClientContainer
      */
     public function getDefault()
     {
-        return $this->get($this->getDefaultName());
+        return $this->get($this->options['default_credentials']);
     }
 
     /**
      * @param string $currentName
      * @return $this
+     * @throws ApiClientBundleException
      */
     public function setCurrentName($currentName)
     {
+        if (!in_array($currentName, $credNames = array_keys($this->options['credentials']))) {
+            throw new ApiClientBundleException(sprintf(
+                'Credentials profile "%s" was not found. The following are available: %s.',
+                $currentName,
+                implode(',', $credNames)
+            ));
+        }
+
         $this->currentName = $currentName;
 
         return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrentName()
-    {
-        return $this->currentName;
     }
 
     /**

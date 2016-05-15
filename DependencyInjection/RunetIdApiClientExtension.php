@@ -33,12 +33,13 @@ class RunetIdApiClientExtension extends ConfigurableExtension
         $apiContainerService = $container
             ->getDefinition('runet_id.api_client.container')
             ->replaceArgument(0, $mergedConfig['container']);
-        
-        $container->setParameter('runet_id.api_client.default_credentials_name', $mergedConfig['container']['default_credentials']);
 
         if ($mergedConfig['cache']['enabled']) {
             $cacheService = new Reference($mergedConfig['cache']['service']);
             $apiContainerService->replaceArgument(2, $cacheService);
         }
+        
+        $container->getDefinition('runet_id.api_client.auth_controller')
+            ->replaceArgument(3, $mergedConfig['entity']['user']['class']);
     }
 }
