@@ -90,18 +90,6 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->arrayNode('entity')
-                    ->children()
-                        ->arrayNode('user')
-                            ->children()
-                                ->scalarNode('class')
-                                    ->isRequired()
-                                    ->cannotBeEmpty()
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
             ->end();
 
         return $treeBuilder;
