@@ -4,6 +4,7 @@ namespace RunetId\ApiClientBundle\Controller;
 
 use RunetId\ApiClientBundle\ApiCacheableClient;
 use RunetId\ApiClientBundle\AuthService;
+use RunetId\ApiClientBundle\Entity\NewUser;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,10 +45,31 @@ class AuthController
     }
 
     /**
-     *
+     * @param Request $request
+     * @return mixed
      */
-    public function registerAction()
+    public function registerAction(Request $request)
     {
+        $newUser = new NewUser();
+
+        $form = $this->createForm('RunetId\ApiClientBundle\Form\RegisterForm', $newUser)
+            ->add('register', 'Symfony\Component\Form\Extension\Core\Type\SubmitType');
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $apiUser = $this->apiClient->user()->create(get_object_vars($newUser));
+
+            $this->apiClient->event()->register($apiUser->RunetId);
+            
+            $user = $this->authService->findOrCreateUser($apiUser->RunetId);
+            $this->authService->authUser($user);
+            
+            return;
+        }
+
+        return $this->render('', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
@@ -58,10 +80,7 @@ class AuthController
     {
         $token = $request->query->get('token');
 
-        $apiUser = $this->apiClient
-            ->noCacheOnce()
-            ->user()
-            ->getByToken($token);
+        $apiUser = $this->apiClient->user()->auth($token);
 
         $user = $this->authService->findOrCreateUser($apiUser->RunetId);
         $this->authService->authUser($user);
