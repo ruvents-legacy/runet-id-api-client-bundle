@@ -6,6 +6,7 @@ services:
 
     runet_id.api_client.cache.file:
         class: RunetId\ApiClientBundle\Cache\FileCache
+        public: false
         arguments:
             - []
             - "@filesystem"
