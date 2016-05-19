@@ -63,7 +63,7 @@ class Configuration implements ConfigurationInterface
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->integerNode('lifetime')
-                                    ->defaultValue(3 * 60)
+                                    ->defaultValue(60)
                                 ->end()
                                 ->scalarNode('dir')
                                     ->defaultValue('%kernel.cache_dir%/runet_id_api_client')
