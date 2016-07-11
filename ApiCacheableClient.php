@@ -6,6 +6,7 @@ use RunetId\ApiClient\ApiClient;
 use RunetId\ApiClientBundle\Cache\CacheInterface;
 use Ruvents\DataReconstructor\DataReconstructor;
 use Ruvents\HttpClient\Request\Request;
+use Ruvents\HttpClient\Response\Response;
 
 /**
  * Class ApiCacheableClient
@@ -85,21 +86,42 @@ class ApiCacheableClient extends ApiClient
             return parent::send($method, $request);
         }
 
-        if ($this->noCacheOnce) {
+        if ($this->noCacheOnce || !$this->cache->isFresh($request)) {
             $this->noCacheOnce = false;
 
-            return parent::send($method, $request);
+            return $this->safeSend($method, $request);
         }
 
-        if ($response = $this->cache->read($request)) {
+        return $this->cache->read($request);
+    }
+
+    /**
+     * @param string  $method
+     * @param Request $request
+     * @return Response|null
+     * @throws \RuntimeException
+     */
+    protected function safeSend($method, Request $request)
+    {
+        try {
+            $response = parent::send($method, $request);
+
+            if ($response->getCode() >= 400) {
+                throw new \RuntimeException();
+            }
+
+            $this->cache->write($request, $response);
+
+            return $response;
+        } catch (\RuntimeException $e) {
+            $response = $this->cache->read($request);
+
+            if (!$response) {
+                throw $e;
+            }
+
             return $response;
         }
-
-        $response = parent::send($method, $request);
-
-        $this->cache->write($request, $response);
-
-        return $response;
     }
 
     /**

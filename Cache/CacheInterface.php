@@ -11,12 +11,6 @@ use Ruvents\HttpClient\Response\Response;
 interface CacheInterface
 {
     /**
-     * @param Request $request
-     * @return null|Response
-     */
-    public function read(Request $request);
-
-    /**
      * @param Request  $request
      * @param Response $response
      */
@@ -24,8 +18,13 @@ interface CacheInterface
 
     /**
      * @param Request $request
+     * @return null|Response
      */
-    public function remove(Request $request);
+    public function read(Request $request);
 
-    public function clear();
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    public function isFresh(Request $request);
 }

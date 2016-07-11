@@ -34,22 +34,6 @@ class FileCache implements CacheInterface
     /**
      * @inheritdoc
      */
-    public function read(Request $request)
-    {
-        $filename = $this->getRequestCachePath($request);
-
-        if ($this->isFresh($request)) {
-            $rawBody = file_get_contents($filename);
-
-            return new Response($rawBody, 200, [], $request);
-        }
-
-        return null;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function write(Request $request, Response $response)
     {
         $filename = $this->getRequestCachePath($request);
@@ -60,26 +44,24 @@ class FileCache implements CacheInterface
     /**
      * @inheritdoc
      */
-    public function remove(Request $request)
+    public function read(Request $request)
     {
         $filename = $this->getRequestCachePath($request);
 
-        $this->filesystem->remove($filename);
-    }
+        if (!$this->filesystem->exists($filename)) {
+            return null;
+        }
 
-    /**
-     * @inheritdoc
-     */
-    public function clear()
-    {
-        $this->filesystem->remove($this->options['dir']);
+        $rawBody = file_get_contents($filename);
+
+        return new Response($rawBody, 200, [], $request);
     }
 
     /**
      * @param Request $request
      * @return bool
      */
-    protected function isFresh(Request $request)
+    public function isFresh(Request $request)
     {
         $filename = $this->getRequestCachePath($request);
 
@@ -88,6 +70,11 @@ class FileCache implements CacheInterface
         }
 
         return (time() - filemtime($filename)) < ($this->options['lifetime'] * 60);
+    }
+
+    public function clear()
+    {
+        $this->filesystem->remove($this->options['dir']);
     }
 
     /**
