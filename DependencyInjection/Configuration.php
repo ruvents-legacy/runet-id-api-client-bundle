@@ -24,6 +24,7 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('container')
                     ->children()
                         ->arrayNode('client')
+                            ->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('host')
                                     ->defaultValue('api.runet-id.com')
