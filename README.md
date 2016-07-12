@@ -1,5 +1,9 @@
 # RUNET-ID API Client Bundle
 
+## Установка:
+
+`$ composer require runet-id/api-client-bundle:^1.0.0@alpha`
+
 ## Минимальная конфигурация
 
 ```yaml
@@ -13,13 +17,13 @@ runet_id_api_client:
 ```
 
 ## Описание
-Центральный для бандла класс - `RunetId\ApiClientBundle\ApiClientContainer`. Он позволяет работать с несколькими ключами одновременно и поддерживает кеширование (по умолчанию файловое в стандартную папку симфони `%kernel.cache_dir%/runet_id_api_client`).
+Центральный для бандла класс - `RunetId\ApiClientBundle\ApiClientContainer`. Он позволяет работать с несколькими ключами одновременно и поддерживает кеширование (по умолчанию включено файловое кеширование в стандартную папку симфони `%kernel.cache_dir%/runet_id_api_client`).
 
-Через конфигурацию в разделе `container:credentials` можно указать несколько профилей. В `default_credentials` указывается имя профиля по умолчанию.
+Через конфигурацию в разделе `container:credentials` можно указать несколько профилей. В `default_credentials` указывается имя профиля по умолчанию (обязательный параметр).
 
-Также в контейнере можно задать "текущий" профиль (например, через `RequestListener`, если выбор профиля зависит от парметров запроса к приложению). По умолчанию метод `RunetId\ApiClientBundle\ApiClientContainer::getCurrent()` возвращает профиль по умолчанию.
+Также в контейнере через `RunetId\ApiClientBundle\ApiClientContainer::setCurrentName($name)` можно задать "текущий" профиль (например, при помощи `RequestListener`, если выбор профиля зависит от параметров запроса к приложению). Если текущий профиль не был задан, метод `RunetId\ApiClientBundle\ApiClientContainer::getCurrent()` возвращает профиль по умолчанию.
 
-Рекомендуется всегда использовать метод `RunetId\ApiClientBundle\ApiClientContainer::getCurrent()`.
+Рекомендуется всегда использовать метод `RunetId\ApiClientBundle\ApiClientContainer::getCurrent()`, так как это обеспечивает максимальную гибкость.
 
 ## Алиасы для быстрого доступа к сервисам (рекомендуется)
 
@@ -31,7 +35,7 @@ services:
         class: RunetId\ApiClientBundle\ApiCacheableClient
         factory: [ "@api_container", getCurrent ]
 
-# вставляем глобальную переменную в твиг
+# создаем глобальную переменную в twig
 # для быстрого доступа к апи из шаблонов
 twig:
     globals:
@@ -54,7 +58,7 @@ twig:
 </script>
 ```
 
-2. Создаем ссылку на авторизацию:
+2. Код кнопки для авторизации
 
 ```html
 <button onclick="runetIdApiClient.login(); return false;">
@@ -97,8 +101,9 @@ class AuthController extends Controller
             throw new HttpException(403, $e->getMessage());
         }
 
-        // здесь, например, авторизуем пользователя средствами Symfony
         $apiUser; // содержит все данные о пользователе, полученные с RunetId
+
+        // здесь авторизуем пользователя средствами Symfony
 
         return new Response('
             <script>
