@@ -44,75 +44,75 @@ twig:
 
 ## Пример настройки авторизации
 
-1. Подключаем `js`:
+### Подключаем `js`:
 
-    ```html
-    <script src="{{ asset('bundles/runetidapiclient/js/runet_id_api_client.js') }}"></script>
-    <script>
-        var runetIdApiClient = new RunetId;
+```html
+<script src="{{ asset('bundles/runetidapiclient/js/runet_id_api_client.js') }}"></script>
+<script>
+    var runetIdApiClient = new RunetId;
 
-        runetIdApiClient.init({
-            apiKey: '{{ api.options.key }}',
-            backUrl: '{{ url('auth.token') }}'
-        });
-    </script>
-    ```
+    runetIdApiClient.init({
+        apiKey: '{{ api.options.key }}',
+        backUrl: '{{ url('auth.token') }}'
+    });
+</script>
+```
 
-2. Код кнопки для авторизации
+### Код кнопки для авторизации
 
-    ```html
-    <button onclick="runetIdApiClient.login(); return false;">
-        Войти через &ndash;RUNET&mdash;&mdash;ID&ndash;
-    </button>
-    ```
+```html
+<button onclick="runetIdApiClient.login(); return false;">
+    Войти через &ndash;RUNET&mdash;&mdash;ID&ndash;
+</button>
+```
 
-3. Пример контроллера
+### Пример контроллера
 
-    ```php
-        <?php
+```php
+<?php
 
-        namespace AppBundle\Controller;
+namespace AppBundle\Controller;
 
-        use RunetId\ApiClient\Exception\ApiException;
-        use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-        use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-        use Symfony\Component\HttpFoundation\Request;
-        use Symfony\Component\HttpFoundation\Response;
-        use Symfony\Component\HttpKernel\Exception\HttpException;
+use RunetId\ApiClient\Exception\ApiException;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
-        /**
-         * @Route("/auth")
-         */
-        class AuthController extends Controller
-        {
-            /**
-             * @Route("/token", name="auth.token")
-             * @param Request $request
-             * @return Response
-             * @throws HttpException
-             */
-            public function tokenAction(Request $request)
-            {
-                $token = $request->query->get('token');
+/**
+ * @Route("/auth")
+ */
+class AuthController extends Controller
+{
+    /**
+     * @Route("/token", name="auth.token")
+     * @param Request $request
+     * @return Response
+     * @throws HttpException
+     */
+    public function tokenAction(Request $request)
+    {
+        $token = $request->query->get('token');
 
-                try {
-                    $apiUser = $this->get('api')->user()->auth($token);
-                } catch (ApiException $e) {
-                    throw new HttpException(403, $e->getMessage());
-                }
-
-                $apiUser; // содержит все данные о пользователе, полученные с RunetId
-
-                // здесь авторизуем пользователя средствами Symfony
-
-                return new Response('
-                    <script>
-                        window.onunload = function () {
-                            window.opener.location.reload();
-                        };
-                        setTimeout(window.close, 400);
-                    </script>
-                ');
-            }
+        try {
+            $apiUser = $this->get('api')->user()->auth($token);
+        } catch (ApiException $e) {
+            throw new HttpException(403, $e->getMessage());
         }
-    ```
+
+        $apiUser; // содержит все данные о пользователе, полученные с RunetId
+
+        // здесь авторизуем пользователя средствами Symfony
+
+        return new Response('
+            <script>
+                window.onunload = function () {
+                    window.opener.location.reload();
+                };
+                setTimeout(window.close, 400);
+            </script>
+        ');
+    }
+}
+```
