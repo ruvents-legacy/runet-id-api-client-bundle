@@ -74,6 +74,7 @@ twig:
 namespace AppBundle\Controller;
 
 use RunetId\ApiClient\Exception\ApiException;
+use RunetId\ApiClient\Model\User;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -96,12 +97,14 @@ class AuthController extends Controller
         $token = $request->query->get('token');
 
         try {
+            // содержит все данные о пользователе, полученные с RunetId
             $apiUser = $this->get('api')->user()->auth($token);
         } catch (ApiException $e) {
             throw new HttpException(403, $e->getMessage());
         }
 
-        $apiUser; // содержит все данные о пользователе, полученные с RunetId
+        // регистрируем пользователя на мероприятие со статусом "Участник"
+        $this->get('api')->event()->register($apiUser->RunetId, User\Status::ROLE_PARTICIPANT);
 
         // здесь авторизуем пользователя средствами Symfony
 
