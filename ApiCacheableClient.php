@@ -130,6 +130,6 @@ class ApiCacheableClient extends ApiClient
      */
     protected function isRequestCacheable(Request $request)
     {
-        return in_array($request->getUri()->getPath(), static::$cacheablePaths, true);
+        return in_array(ltrim($request->getUri()->getPath(), '/'), static::$cacheablePaths, true);
     }
 }
