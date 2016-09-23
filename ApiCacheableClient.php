@@ -43,6 +43,11 @@ class ApiCacheableClient extends ApiClient
     protected $noCacheOnce = false;
 
     /**
+     * @var bool
+     */
+    protected $useCache = true;
+
+    /**
      * @param string              $name
      * @param array               $options
      * @param DataReconstructor   $modelReconstructor
@@ -78,6 +83,22 @@ class ApiCacheableClient extends ApiClient
     }
 
     /**
+     * @param bool $useCache
+     */
+    public function setUseCache($useCache)
+    {
+        $this->useCache = $useCache;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getUseCache()
+    {
+        return $this->useCache;
+    }
+
+    /**
      * @inheritdoc
      */
     protected function send($method, Request $request)
@@ -86,13 +107,17 @@ class ApiCacheableClient extends ApiClient
             return parent::send($method, $request);
         }
 
-        if ($this->noCacheOnce || !$this->cache->isFresh($request)) {
-            $this->noCacheOnce = false;
+        switch (true) {
+            /** @noinspection PhpMissingBreakStatementInspection */
+            case $this->noCacheOnce:
+                $this->noCacheOnce = false;
+            case !$this->useCache:
+            case !$this->cache->isFresh($request):
+                return $this->safeSend($method, $request);
 
-            return $this->safeSend($method, $request);
+            default:
+                return $this->cache->read($request);
         }
-
-        return $this->cache->read($request);
     }
 
     /**
