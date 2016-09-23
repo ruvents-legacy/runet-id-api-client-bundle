@@ -84,10 +84,13 @@ class ApiCacheableClient extends ApiClient
 
     /**
      * @param bool $useCache
+     * @return $this
      */
     public function setUseCache($useCache)
     {
         $this->useCache = $useCache;
+
+        return $this;
     }
 
     /**
