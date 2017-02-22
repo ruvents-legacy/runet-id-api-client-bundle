@@ -8,13 +8,10 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-/**
- * Class RunetIdApiClientExtension
- */
 class RunetIdApiClientExtension extends ConfigurableExtension
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {

@@ -8,16 +8,8 @@ use Ruvents\DataReconstructor\DataReconstructor;
 use Ruvents\HttpClient\Request\Request;
 use Ruvents\HttpClient\Response\Response;
 
-/**
- * Class ApiCacheableClient
- */
 class ApiCacheableClient extends ApiClient
 {
-    /**
-     * @var string
-     */
-    private $name;
-
     /**
      * @var array
      */
@@ -48,9 +40,14 @@ class ApiCacheableClient extends ApiClient
     protected $useCache = true;
 
     /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * {@inheritdoc}
+     *
      * @param string              $name
-     * @param array               $options
-     * @param DataReconstructor   $modelReconstructor
      * @param CacheInterface|null $cache
      */
     public function __construct(
@@ -59,8 +56,8 @@ class ApiCacheableClient extends ApiClient
         DataReconstructor $modelReconstructor,
         CacheInterface $cache = null
     ) {
-        $this->name = $name;
         parent::__construct($options, $modelReconstructor);
+        $this->name = $name;
         $this->cache = $cache;
     }
 
@@ -83,7 +80,16 @@ class ApiCacheableClient extends ApiClient
     }
 
     /**
+     * @return bool
+     */
+    public function getUseCache()
+    {
+        return $this->useCache;
+    }
+
+    /**
      * @param bool $useCache
+     *
      * @return $this
      */
     public function setUseCache($useCache)
@@ -94,15 +100,7 @@ class ApiCacheableClient extends ApiClient
     }
 
     /**
-     * @return bool
-     */
-    public function getUseCache()
-    {
-        return $this->useCache;
-    }
-
-    /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function send($method, Request $request)
     {
@@ -126,7 +124,9 @@ class ApiCacheableClient extends ApiClient
     /**
      * @param string  $method
      * @param Request $request
+     *
      * @return Response|null
+     *
      * @throws \RuntimeException
      */
     protected function safeSend($method, Request $request)
@@ -154,6 +154,7 @@ class ApiCacheableClient extends ApiClient
 
     /**
      * @param Request $request
+     *
      * @return bool
      */
     protected function isRequestCacheable(Request $request)

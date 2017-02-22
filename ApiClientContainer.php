@@ -6,9 +6,6 @@ use RunetId\ApiClientBundle\Cache\CacheInterface;
 use RunetId\ApiClientBundle\Exception\ApiClientBundleException;
 use Ruvents\DataReconstructor\DataReconstructor;
 
-/**
- * Class ApiClientContainer
- */
 class ApiClientContainer
 {
     /**
@@ -50,7 +47,10 @@ class ApiClientContainer
 
     /**
      * @param string $name
+     *
      * @return ApiCacheableClient
+     *
+     * @throws ApiClientBundleException
      */
     public function get($name)
     {
@@ -84,7 +84,9 @@ class ApiClientContainer
 
     /**
      * @param string $currentName
+     *
      * @return $this
+     *
      * @throws ApiClientBundleException
      */
     public function setCurrentName($currentName)
@@ -116,6 +118,7 @@ class ApiClientContainer
 
     /**
      * @param string $name
+     *
      * @return array
      */
     protected function getClientOptions($name)

@@ -5,13 +5,10 @@ namespace RunetId\ApiClientBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-/**
- * Class Configuration
- */
 class Configuration implements ConfigurationInterface
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
     {
